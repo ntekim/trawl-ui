@@ -3,28 +3,3 @@ body {
   background-color: black;
   color: white;
 }
-
-/* Additional fix for Algolia's big images in your screenshot */
-/* img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-} */
-
-/* .ais-Hits-item {
-  list-style-type: none;
-}
-
-.ais-Hits-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
-  list-style: none;
-  padding: 0;
-}
-
-@media (min-width: 1024px) {
-  .ais-Hits-list {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-} */

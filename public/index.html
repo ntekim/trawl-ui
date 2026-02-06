@@ -2,119 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@4.75.0/dist/widgets/chat/chat.css">
+    <title>CineAgent AI</title>
+    <!-- Algolia Base Styles -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@8.10.0/themes/satellite-min.css">
-
-    <!-- <style>
-    /* FORCING INPUT VISIBILITY */
-    .ais-Chat-input {
-      background-color: #1a1a1a !important; /* Dark grey background */
-      color: #333 !important;           /* Pure white text */
-      caret-color: #2563eb !important;     /* Blue cursor */
-      border: 1px solid #333 !important;
-      padding: 12px 20px !important;
-      font-size: 16px !important;
-      appearance: none !important;
-    }
-
-    /* CRITICAL: Some browsers require this to show the typed text in dark backgrounds */
-    .ais-Chat-input, 
-    .ais-Chat-input:focus {
-      -webkit-text-fill-color: white !important;
-      opacity: 1 !important;
-    }
-
-    /* Fix placeholder color */
-    .ais-Chat-input::placeholder {
-      color: #718096 !important;
-      opacity: 1 !important;
-    }
-
-    /* 2. HIDE THE SCARY JSON TEXT */
-    /* This targets the citations that look like raw code */
-    .ais-Chat-hit,
-    .ais-Chat-message pre,
-    .ais-Chat-message code,
-    .ais-Chat-citations {
-      display: none !important;
-      visibility: hidden !important;
-      height: 0 !important;
-      overflow: hidden !important;
-    }
-
-    /* 3. FIX SCROLLING */
-    .ais-Chat-list {
-      overflow-y: auto !important;
-      max-height: 100% !important;
-      padding-bottom: 80px !important; /* Space for input */
-      display: flex !important;
-      flex-direction: column !important;
-    }
-  </style> -->
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    <!-- Algolia Chat Widget Beta Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@4.75.0/dist/widgets/chat/chat.css">
   </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+  <body style="background-color: black;">
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-
-    <script 
-      src="https://cdn.jsdelivr.net/npm/@algolia/agent-studio-widget"
-      data-agent-id="4ddf0636-38b2-4578-a98f-8715efde81ca"
-      data-app-id="8D8MDXM82F"
-      data-api-key="6b454c0c6835da737d8bbca45b2e2379"
-    ></script>
-    <script>
-      // This is the bridge function
-      window.openAgent = function() {
-        // 1. If Algolia's widget provides a global toggle (check their docs for the specific ID)
-        // Most widgets use a selector like this to find the "Close/Open" button
-        const agentButton = document.querySelector('.algolia-chat-button') || 
-                            document.querySelector('[aria-label="Open chat"]');
-        
-        if (agentButton) {
-          agentButton.click();
-        } else {
-          // Fallback: If the widget is loaded, try calling its internal show method
-          if (window.AlgoliaAgent) {
-            window.AlgoliaAgent.show();
-          } else {
-            alert("CineAgent is still loading... please try again in a second.");
-          }
-        }
-      };
-    </script>
   </body>
 </html>

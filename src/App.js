@@ -15,7 +15,6 @@ import {
   Button
 } from '@chakra-ui/react';
 import { system } from './theme'; 
-import { liteClient } from 'algoliasearch/lite';
 import { 
   InstantSearch, 
   SearchBox, 
@@ -23,13 +22,21 @@ import {
   RefinementList, 
   Pagination,
   useInstantSearch,
-  useSearchBox // Using this to link voice to search
+  useSearchBox,
+  Chat
 } from 'react-instantsearch';
-import { Mic, MessageSquare, Play, Search } from 'lucide-react';
-import CineChat from './CineChat';
+import { algoliasearch } from 'algoliasearch';
+import { Mic, Play, Star, Calendar, Search } from 'lucide-react';
 
-const searchClient = liteClient('8D8MDXM82F', '6b454c0c6835da737d8bbca45b2e2379');
+const searchClient = algoliasearch('8D8MDXM82F', '6b454c0c6835da737d8bbca45b2e2379');
 
+// --- HELPER: PROGRAMMATIC CHAT OPEN ---
+const openCineAgent = () => {
+  const chatButton = document.querySelector('.ais-ChatToggleButton');
+  if (chatButton) chatButton.click();
+};
+
+// --- MOVIE CARD ---
 const MovieHit = ({ hit }) => (
   <Box position="relative" borderRadius="xl" overflow="hidden" bg="#111" transition="all 0.3s" _hover={{ transform: 'scale(1.05)', zIndex: 10 }}>
     <Box aspectRatio="2/3" position="relative"> 
@@ -38,8 +45,8 @@ const MovieHit = ({ hit }) => (
       <VStack position="absolute" bottom="0" p="3" align="start" gap="0.5" w="100%">
         <Text color="white" fontWeight="bold" fontSize="xs" noOfLines={1}>{hit.title}</Text>
         <HStack gap="3" fontSize="10px" color="gray.500">
-          <Text>{hit.year}</Text>
-          <Text color="yellow.500">★ {hit.rating}</Text>
+            <HStack gap="1"><Calendar size={10} /> <Text>{hit.year}</Text></HStack>
+            <HStack gap="1" color="yellow.400"><Star size={10} fill="currentColor" /> <Text fontWeight="bold">{hit.rating}</Text></HStack>
         </HStack>
       </VStack>
     </Box>
@@ -55,82 +62,76 @@ const CustomHits = () => {
   );
 };
 
-const NoResultsBoundary = ({ children, onOpenChat }) => {
-  const { results, status } = useInstantSearch();
-  if (status === 'loading') return <Flex justify="center" py="40"><Spinner color="blue.500" /></Flex>;
-  if (results && results.nbHits === 0) {
-    return (
-      <VStack py="20" px="6" textAlign="center" bg="whiteAlpha.50" borderRadius="2xl" border="1px dashed" borderColor="whiteAlpha.200">
-        <Search size={30} color="gray" />
-        <Heading size="sm" color="white">Movie Not Found</Heading>
-        <Button colorPalette="blue" rounded="full" size="sm" onClick={onOpenChat} mt="4">Ask CineAgent AI</Button>
-      </VStack>
-    );
-  }
-  return children;
-};
-
-// --- CUSTOM VOICE COMPONENT ---
-const VoiceSearchButton = ({ setVoiceText, onOpenChat }) => {
+// --- VOICE SEARCH (Fixed Icon & Logic) ---
+const VoiceSearch = () => {
   const { refine } = useSearchBox();
   const [isListening, setIsListening] = useState(false);
 
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("Voice not supported in this browser");
+    if (!SpeechRecognition) return alert("Speech recognition not supported in this browser.");
 
     const recognition = new SpeechRecognition();
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      refine(transcript); // Updates the movie grid
-      setVoiceText(transcript); // Passes text to AI Chat
-      onOpenChat(); // Opens the AI Chat
+      refine(transcript);
+      if (transcript.split(' ').length > 3) openCineAgent();
     };
     recognition.start();
   };
 
   return (
     <IconButton 
-      aria-label="Voice Search" 
+      aria-label="Mic" 
       variant="ghost" 
-      onClick={startListening} 
+      onClick={startListening}
       color={isListening ? "red.500" : "blue.400"}
-      className={isListening ? "animate-pulse" : ""}
     >
       <Mic size={20} />
     </IconButton>
   );
 };
 
-export default function App() {
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [voiceText, setVoiceText] = useState("");
+const NoResultsBoundary = ({ children }) => {
+  const { results, status } = useInstantSearch();
+  if (status === 'loading') return <Flex justify="center" py="40"><Spinner color="blue.500" /></Flex>;
+  if (results && results.nbHits === 0) {
+    return (
+      <VStack py="20" px="6" textAlign="center" bg="whiteAlpha.50" borderRadius="2xl" border="1px dashed" borderColor="whiteAlpha.200" w="100%">
+        <Search size={30} color="gray" />
+        <Heading size="sm" color="white">Movie not found</Heading>
+        <Button colorPalette="blue" rounded="full" size="sm" onClick={openCineAgent} mt="4">
+          Ask AI Assistant
+        </Button>
+      </VStack>
+    );
+  }
+  return children;
+};
 
+export default function App() {
   return (
     <ChakraProvider value={system}>
       <Box minH="100vh" bg="#000" color="white">
-        <InstantSearch 
-            searchClient={searchClient} 
-            indexName="cine_agent"
-            future={{ preserveSharedStateOnUnmount: true }}
-        >
-          {/* HEADER */}
-          <Box position="sticky" top="0" bg="rgba(0,0,0,0.9)" backdropFilter="blur(10px)" zIndex="1000" borderBottom="1px solid" borderColor="whiteAlpha.100">
+        <InstantSearch searchClient={searchClient} indexName="cine_agent" future={{ preserveSharedStateOnUnmount: true }}>
+          
+          <Box position="sticky" top="0" bg="rgba(0,0,0,0.95)" backdropFilter="blur(10px)" zIndex="1000" borderBottom="1px solid" borderColor="whiteAlpha.100">
             <Container maxW="8xl" py="4">
               <Flex align="center" justify="space-between" gap={4}>
-                <HStack gap="3" onClick={() => window.location.reload()} cursor="pointer">
-                  <Box bg="blue.600" p="2" borderRadius="md"><Play size={16} fill="white" /></Box>
-                  <Heading size="md" tracking="tighter" hideBelow="sm">CINEAGENT</Heading>
+                <HStack gap="3" cursor="pointer" onClick={() => window.location.reload()}>
+                    <Box bg="blue.600" p="2" borderRadius="md"><Play size={16} fill="white" /></Box>
+                    <Heading size="md" tracking="tighter" hideBelow="sm">CINEAGENT</Heading>
                 </HStack>
 
-                <Flex flex="1" maxW="2xl" align="center" bg="#111" borderRadius="full" px="3" border="1px solid" borderColor="whiteAlpha.200">
-                  <Box flex="1">
-                    <SearchBox placeholder="Search films or ask AI..." classNames={{ input: 'clean-input', form: 'clean-form' }} />
-                  </Box>
-                  <VoiceSearchButton setVoiceText={setVoiceText} onOpenChat={() => setIsChatOpen(true)} />
+                <Flex flex="1" maxW="2xl" align="center" bg="#1A1A1A" borderRadius="full" px="3" border="1px solid" borderColor="whiteAlpha.200">
+                    <Box flex="1">
+                        <SearchBox placeholder="Search films..." classNames={{ input: 'clean-input', form: 'clean-form' }} />
+                    </Box>
+                    <VoiceSearch />
                 </Flex>
+                <Box w="40px" hideBelow="sm" />
               </Flex>
             </Container>
           </Box>
@@ -138,12 +139,10 @@ export default function App() {
           <Container maxW="8xl" py="10">
             <Flex gap="12">
               <Box w="200px" shrink="0" hideBelow="md">
-                <Heading size="xs" color="blue.500" mb="6" textTransform="uppercase">Years</Heading>
                 <RefinementList attribute="year" limit={15} classNames={{ item: 'f-item', labelText: 'f-label', count: 'f-count' }} />
               </Box>
-
               <Box flex="1">
-                <NoResultsBoundary onOpenChat={() => setIsChatOpen(true)}>
+                <NoResultsBoundary>
                     <CustomHits />
                     <Flex justify="center" mt="10"><Pagination /></Flex>
                 </NoResultsBoundary>
@@ -151,44 +150,36 @@ export default function App() {
             </Flex>
           </Container>
 
-          <IconButton
-            aria-label="Chat"
-            colorPalette="blue"
-            rounded="full"
-            position="fixed"
-            bottom="6"
-            right="6"
-            h="14"
-            w="14"
-            shadow="0 0 20px rgba(37, 99, 235, 0.4)"
-            onClick={() => setIsChatOpen(true)}
-            zIndex="2000"
-          >
-            <MessageSquare size={24} />
-          </IconButton>
-
-          <CineChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} voiceText={voiceText} />
+          <Chat 
+             agentId="4ddf0636-38b2-4578-a98f-8715efde81ca" 
+             templates={{ item: () => '' }} 
+          />
         </InstantSearch>
       </Box>
 
       <style>{`
-        .clean-form { background: transparent !important; border: none !important; box-shadow: none !important; }
-        .clean-form::before { display: none !important; }
-        .clean-input { 
+        /* KILL THE WHITE SEARCH BOX */
+        .ais-SearchBox-form { background: transparent !important; border: none !important; box-shadow: none !important; }
+        .ais-SearchBox-form::before { display: none !important; }
+        .ais-SearchBox-input { 
             background: transparent !important; 
-            border: none !important; 
-            color: black !important; 
-            padding: 10px 15px !important; 
+            color: white !important; 
+            border: none !important;
+            padding: 8px 10px !important;
             width: 100% !important;
-            outline: none !important;
+            box-shadow: none !important;
         }
         .ais-SearchBox-submit, .ais-SearchBox-reset { display: none !important; }
-        .f-item { display: flex; align-items: center; padding: 5px 0; font-size: 13px; color: #718096; }
+
+        /* LIGHT CHAT UI THEME */
+        .ais-Chat-container { background-color: white !important; color: #1A202C !important; border-radius: 20px !important; }
+        .ais-Chat-input { background: #EDF2F7 !important; color: #000 !important; -webkit-text-fill-color: #000 !important; }
+        .ais-Chat-message--agent { background: #EDF2F7 !important; color: #2D3748 !important; }
+        .ais-Chat-hit, .ais-Chat-message pre { display: none !important; }
+        
+        .f-item { display: flex; align-items: center; padding: 4px 0; color: #718096; }
         .f-label { flex: 1; cursor: pointer; margin-left: 8px; }
-        .f-count { font-size: 10px; background: #111; padding: 1px 5px; border-radius: 3px; }
-        .ais-Pagination-list { display: flex; gap: 8px; list-style: none; justify-content: center; }
-        .ais-Pagination-link { background: #111; padding: 8px 15px; border-radius: 8px; font-size: 13px; color: #4A5568; text-decoration: none; }
-        .ais-Pagination-item--selected .ais-Pagination-link { background: #2563eb; color: white; }
+        .f-count { font-size: 9px; background: #111; padding: 1px 4px; border-radius: 3px; }
       `}</style>
     </ChakraProvider>
   );

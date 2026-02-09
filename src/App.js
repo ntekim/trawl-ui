@@ -28,7 +28,11 @@ import {
 import { algoliasearch } from 'algoliasearch';
 import { Mic, Play, Star, Calendar, Search } from 'lucide-react';
 
-const searchClient = algoliasearch('8D8MDXM82F', '6b454c0c6835da737d8bbca45b2e2379');
+// --- CONFIGURATION ---
+const searchClient = algoliasearch(
+  process.env.REACT_APP_ALGOLIA_APP_ID, 
+  process.env.REACT_APP_ALGOLIA_SEARCH_ONLY_KEY
+);
 
 // --- HELPER: PROGRAMMATIC CHAT OPEN ---
 const openCineAgent = () => {
@@ -151,7 +155,7 @@ export default function App() {
           </Container>
 
           <Chat 
-             agentId="79c8357c-9cdd-47ca-9939-c6c68e8247a5" 
+             agentId={process.env.REACT_APP_ALGOLIA_AGENT_ID} 
              templates={{ item: () => '' }} 
           />
         </InstantSearch>

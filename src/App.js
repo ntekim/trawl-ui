@@ -151,7 +151,7 @@ export default function App() {
           </Container>
 
           <Chat 
-             agentId="4ddf0636-38b2-4578-a98f-8715efde81ca" 
+             agentId="79c8357c-9cdd-47ca-9939-c6c68e8247a5" 
              templates={{ item: () => '' }} 
           />
         </InstantSearch>

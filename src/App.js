@@ -156,7 +156,23 @@ export default function App() {
 
           <Chat 
              agentId={process.env.REACT_APP_ALGOLIA_AGENT_ID} 
-             templates={{ item: () => '' }} 
+             templates={{ item(hit, { html }) {
+                return html`
+                  <div style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 8px;">
+                    <img src="${hit.image_url}" style="width: 30px; height: 45px; object-fit: cover; border-radius: 4px;" />
+                    <div style="display: flex; flex-direction: column;">
+                      <span style="font-weight: bold; font-size: 12px; color: #1a202c;">${hit.title}</span>
+                      <span style="font-size: 10px; color: #64748b;">${hit.year} • Rating: ${hit.rating}</span>
+                    </div>
+                  </div>
+                `;
+              },
+                       
+              header: {
+                titleIcon: () => '',
+                titleText: 'CineAgent AI Assistant',
+              }         
+              }} 
           />
         </InstantSearch>
       </Box>

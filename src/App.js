@@ -156,51 +156,45 @@ export default function App() {
 
           <Chat 
              agentId={process.env.REACT_APP_ALGOLIA_AGENT_ID} 
-             templates={{ item(hit, { html }) {
-                return html`
-                  <div style="display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 8px;">
-                    <img src="${hit.image_url}" style="width: 30px; height: 45px; object-fit: cover; border-radius: 4px;" />
-                    <div style="display: flex; flex-direction: column;">
-                      <span style="font-weight: bold; font-size: 12px; color: #1a202c;">${hit.title}</span>
-                      <span style="font-size: 10px; color: #64748b;">${hit.year} • Rating: ${hit.rating}</span>
-                    </div>
-                  </div>
-                `;
-              },
-                       
-              header: {
-                titleIcon: () => '',
-                titleText: 'CineAgent AI Assistant',
-              }         
+             templates={{ 
+                item: () => '',      
+                header: {
+                  titleIcon: () => '',
+                  titleText: 'CineAgent AI Assistant',
+                }         
               }} 
           />
         </InstantSearch>
       </Box>
 
       <style>{`
-        /* KILL THE WHITE SEARCH BOX */
-        .ais-SearchBox-form { background: transparent !important; border: none !important; box-shadow: none !important; }
-        .ais-SearchBox-form::before { display: none !important; }
-        .ais-SearchBox-input { 
-            background: transparent !important; 
-            color: white !important; 
-            border: none !important;
-            padding: 8px 10px !important;
-            width: 100% !important;
-            box-shadow: none !important;
-        }
-        .ais-SearchBox-submit, .ais-SearchBox-reset { display: none !important; }
-
-        /* LIGHT CHAT UI THEME */
-        .ais-Chat-container { background-color: white !important; color: #1A202C !important; border-radius: 20px !important; }
-        .ais-Chat-input { background: #EDF2F7 !important; color: #000 !important; -webkit-text-fill-color: #000 !important; }
-        .ais-Chat-message--agent { background: #EDF2F7 !important; color: #2D3748 !important; }
-        .ais-Chat-hit, .ais-Chat-message pre { display: none !important; }
+          /* 1. HIDE THE RAW JSON DUMP ENTIRELY */
+          .ais-Chat-hit, 
+          .ais-Chat-citations, 
+          .ais-Chat-message pre, 
+          .ais-Chat-message code { 
+            display: none !important; 
+            visibility: hidden !important;
+            height: 0 !important;
+          }
         
-        .f-item { display: flex; align-items: center; padding: 4px 0; color: #718096; }
-        .f-label { flex: 1; cursor: pointer; margin-left: 8px; }
-        .f-count { font-size: 9px; background: #111; padding: 1px 4px; border-radius: 3px; }
-      `}</style>
+          /* 2. FIX INPUT TEXT VISIBILITY (White background fix) */
+          .ais-Chat-input {
+            background-color: #ffffff !important;
+            color: #1a202c !important; /* Forces black text on the white box */
+            -webkit-text-fill-color: #1a202c !important;
+            border: 1px solid #cbd5e0 !important;
+            padding: 12px !important;
+            font-size: 14px !important;
+          }
+        
+          /* 3. SCROLLING FIX */
+          .ais-Chat-list {
+            overflow-y: auto !important;
+            max-height: 100% !important;
+            padding: 20px !important;
+          }
+        `}</style>
     </ChakraProvider>
   );
 }
